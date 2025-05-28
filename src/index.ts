@@ -3,6 +3,7 @@ import { PORT } from "./secrets";
 import rootRouter from "./Routes";
 import { PrismaClient } from "@prisma/client";
 import { errorMiddleware } from "./Controllers/middlewares/errors";
+import { SignUpSchema } from "./schema/user";
 
 const app = express();
 
@@ -16,7 +17,16 @@ app.use("/api", rootRouter);
 
 export const prismaClient = new PrismaClient({
   log: ["query"],
-});
+}).$extends({
+  query: {
+    user: {
+      create({args, query}) {
+        args.data = SignUpSchema.parse(args.data)
+        return query(args)
+      }
+    }
+  }
+})
 
 app.use(errorMiddleware); 
 
